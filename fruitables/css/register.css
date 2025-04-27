@@ -1,0 +1,139 @@
+body.bg-green {
+	background: linear-gradient(135deg, #32a852, #63d471);
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.register-container {
+	background: #fff;
+	max-width: 1000px;
+	margin: 1rem auto;
+	padding: 1rem;
+	border-radius: 10px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+.left-panel {
+	width: 40%;
+	background: rgba(46, 125, 50, 0.03);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 3rem;
+}
+
+.left-panel img {
+	width: 100%;
+	max-width: 200px;
+}
+
+.right-panel {
+	width: 60%;
+	padding: 3rem;
+}
+
+h3 {
+	font-size: 22px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+}
+
+.input-group {
+	border: 1px solid #ced4da;
+	border-radius: 5px;
+	transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+	border-color: #2e7d32;
+	box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.15);
+}
+
+.input-group-text {
+	background: transparent;
+	border: none;
+	color: #666;
+	padding-left: 1rem;
+}
+
+.form-control {
+	border: none;
+	padding: 0.75rem;
+	margin-bottom: 10px;
+	border-radius: 5px;
+}
+
+.form-control:focus {
+	box-shadow: none;
+}
+
+.btn-primary {
+	background-color: #2e7d32;
+	border-color: #2e7d32;
+	padding: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.5px;
+	transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+	background-color: #1f5a26;
+	border-color: #1f5a26;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-input:checked {
+	background-color: #2e7d32;
+	border-color: #2e7d32;
+}
+
+.login-link {
+	text-align: center;
+	margin-top: 10px;
+}
+
+.login-link .btn {
+	padding: 0.5rem 1rem;
+	transition: all 0.3s ease;
+}
+
+.login-link .btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-link a {
+	color: #007bff;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.login-link a:hover {
+	text-decoration: underline;
+}
+
+.alert {
+	border: none;
+	border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+	.register-container {
+		margin: 1rem;
+	}
+
+	.left-panel,
+	.right-panel {
+		padding: 2rem;
+	}
+}

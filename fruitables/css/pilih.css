@@ -1,0 +1,77 @@
+body {
+	background: linear-gradient(to right, #60df4a, #347928);
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0;
+}
+
+.register-container {
+	display: flex;
+	background: #fff;
+	border-radius: 10px;
+	overflow: hidden;
+	padding: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	width: 900px;
+	max-width: 95%;
+}
+
+.left-panel {
+	width: 40%;
+	background: white;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+}
+
+.left-panel img {
+	width: 100%;
+	max-width: 250px;
+}
+
+.right-panel {
+	width: 60%;
+	padding: 40px;
+}
+
+h3 {
+	font-size: 24px;
+	font-weight: bold;
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+.btn-register {
+	background: #007bff;
+	color: white;
+	width: 100%;
+	padding: 10px;
+	border-radius: 5px;
+	border: none;
+	cursor: pointer;
+	font-weight: bold;
+	transition: all 0.3s ease-in-out;
+}
+
+.btn-register:hover {
+	background: #0056b3;
+}
+
+.login-link {
+	text-align: center;
+	margin-top: 15px;
+}
+
+.login-link a {
+	color: #007bff;
+	text-decoration: none;
+	transition: color 0.3s ease-in-out;
+	font-weight: bold;
+}
+
+.login-link a:hover {
+	text-decoration: underline;
+}
