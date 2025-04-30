@@ -2,7 +2,7 @@
 // Load header template
 $this->load->view('templates/header');
 ?>
-<!-- testing -->
+<!-- testing 2 -->
 <!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
     <h1 class="text-center text-white display-6">Belanja</h1>
