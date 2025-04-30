@@ -9,6 +9,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Better-nak</title>
+
+    <link rel="icon" href="<?= site_url('fruitables/img/favicon.ico') ?>" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -88,17 +90,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= site_url('seller/analytics') ?>">
-                                <i class="fas fa-chart-line me-2"></i> Analytics
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= site_url('seller/reviews') ?>">
+                            <a class="nav-link" href="<?= site_url('seller/product_reviews') ?>">
                                 <i class="fas fa-comments me-2"></i> Reviews
                             </a>
                         </li>
                         <li class="nav-item mt-3">
-                            <a class="nav-link text-danger" href="<?= site_url('auth') ?>">
+                            <a class="nav-link text-danger" href="<?= site_url('auth/logout') ?>">
                                 <i class="fas fa-sign-out-alt me-2"></i> Logout
                             </a>
                         </li>
@@ -203,8 +200,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                         <tr>
                                             <td>#<?= $order['id'] ?></td>
                                             <td>
-                                                <?= htmlspecialchars($order['customer_name']) ?><br>
-                                                <small class="text-muted"><?= $order['customer_email'] ?></small>
+                                                <?= htmlspecialchars($order['customer_name'] ?? 'N/A') ?><br>
+                                                <small class="text-muted"><?= $order['customer_email'] ?? '' ?></small>
                                             </td>
                                             <td>
                                                 <?= date('d M Y', strtotime($order['created_at'])) ?><br>
@@ -216,9 +213,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                             </td>
                                             <td>
                                                 <span class="badge bg-<?=
-                                                                        $order['order_status'] == 'pending' ? 'warning' : ($order['order_status'] == 'processing' ? 'info' : ($order['order_status'] == 'shipped' ? 'primary' : 'success'))
-                                                                        ?>">
-                                                    <?= ucfirst($order['order_status']) ?>
+                                                    ($order['order_status'] ?? 'pending') == 'pending' ? 'warning' : 
+                                                    (($order['order_status'] ?? 'pending') == 'processing' ? 'info' : 
+                                                    (($order['order_status'] ?? 'pending') == 'shipped' ? 'primary' : 'success')) 
+                                                ?>">
+                                                    <?= ucfirst($order['order_status'] ?? 'pending') ?>
                                                 </span>
                                             </td>
                                             <td>

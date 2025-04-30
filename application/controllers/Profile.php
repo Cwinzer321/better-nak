@@ -42,7 +42,7 @@ class Profile extends CI_Controller
 		if (!$this->upload->do_upload('profile_picture')) {
 			$error = $this->upload->display_errors();
 			$this->session->set_flashdata('error', $error);
-			redirect('profile');  // Added redirect for error case
+			redirect('profile/index');  // Added redirect for error case
 		} else {
 			$data = array('upload_data' => $this->upload->data());
 			$filename = $data['upload_data']['file_name'];
@@ -55,7 +55,7 @@ class Profile extends CI_Controller
 	public function delete_profile_picture()
 	{
 		if (!$this->session->userdata('logged_in')) {
-			redirect('auth');
+			redirect('auth/login');
 		}
 
 		$this->load->model('User_model');
@@ -73,19 +73,19 @@ class Profile extends CI_Controller
 			$this->session->set_flashdata('error', 'Tidak ada foto profil untuk dihapus.');
 		}
 
-		redirect('profile');
+		redirect('profile/index');
 	}
 
 	public function delete_profile()
 	{
 		if (!$this->session->userdata('logged_in')) {
-			redirect('auth');
+			redirect('auth/login');
 		}
 
 		$this->load->model('User_model');
 		$id_user = $this->session->userdata('id_user');
 		$this->User_model->delete_user($id_user);
 		$this->session->sess_destroy();
-		redirect('auth');
+		redirect('auth/login');
 	}
 }

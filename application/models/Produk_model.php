@@ -8,7 +8,7 @@ class Produk_model extends Base_model {
     public function __construct() {
         parent::__construct();
     }
-    
+           
     /**
      * Get all products with pagination
      * 
@@ -23,6 +23,7 @@ class Produk_model extends Base_model {
         $this->db->join('categories', 'products.category_id = categories.id', 'left');
         $this->db->join('users', 'products.seller_id = users.id', 'left');
         $this->db->where('products.status', 'active');
+        $this->db->select('users.farm_address');
         
         // Apply filters if provided
         if (!empty($filters)) {
@@ -205,9 +206,14 @@ class Produk_model extends Base_model {
      * @return int Number of products
      */
     public function count_seller_products($seller_id) {
-        $this->db->where('seller_id', $seller_id);
-        $this->db->where('status', 'active');
-        return $this->db->count_all_results('products');
+        $this->db->where('seller_id', $seller_id);  // Changed from id_penjual to seller_id
+        return $this->db->count_all_results('products');  // Changed from produk to products
+    }
+    
+    public function get_seller_products($seller_id, $limit, $offset) {
+        $this->db->where('seller_id', $seller_id);  // Changed from id_penjual to seller_id
+        $this->db->limit($limit, $offset);
+        return $this->db->get('products')->result_array();  // Changed from produk to products
     }
     
     /**
@@ -242,4 +248,6 @@ class Produk_model extends Base_model {
         
         return $this->db->get()->result_array();
     }
+    
+
 }

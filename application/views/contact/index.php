@@ -6,10 +6,10 @@ $this->load->view('templates/header');
 
 <!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
-    <h1 class="text-center text-white display-6">Contact</h1>
+    <h1 class="text-center text-white display-6">Kontak</h1>
     <ol class="breadcrumb justify-content-center mb-0">
-        <li class="breadcrumb-item"><a href="<?= site_url('beranda') ?>">Home</a></li>
-        <li class="breadcrumb-item active text-white">Contact</li>
+        <li class="breadcrumb-item"><a href="<?= site_url('beranda') ?>">Beranda</a></li>
+        <li class="breadcrumb-item active text-white">Kontak</li>
     </ol>
 </div>
 <!-- Single Page Header End -->

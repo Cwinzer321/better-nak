@@ -12,6 +12,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_Output $output
  * @property CI_Upload $upload
  * @property CI_Form_validation $form_validation
+ * @property pagination $pagination
  */
 
 class Seller extends CI_Controller
@@ -26,7 +27,7 @@ class Seller extends CI_Controller
         if (!$this->session->userdata('logged_in')) {
             redirect('auth');
         }
-        
+
         $user_role = $this->session->userdata('role');
         if ($user_role !== 'seller') {
             $this->session->set_flashdata('error', 'Unauthorized access!');
@@ -56,14 +57,53 @@ class Seller extends CI_Controller
     // Product Management Methods
     public function produk()
     {
-        $user_id = $this->session->userdata('user_id');
+        $this->load->library('pagination');
         
+        // Pagination config
+        $config['base_url'] = site_url('seller/produk');
+        $config['total_rows'] = $this->Produk_model->count_seller_products($this->session->userdata('user_id'));
+        $config['per_page'] = 10;
+        $config['uri_segment'] = 3;
+        
+        $this->pagination->initialize($config);
+        
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+        
+        // Get products with pagination
+        $data['products'] = $this->Produk_model->get_seller_products(
+            $this->session->userdata('user_id'),
+            $config['per_page'],
+            $page
+        );
+        
+        $sort_field = $this->input->get('sort') ?? 'created_at';
+        $sort_dir = $this->input->get('dir') ?? 'desc';
+        
+        // Validate sort fields
+        if (!in_array($sort_field, ['name', 'price'])) $sort_field = 'created_at';
+        if (!in_array($sort_dir, ['asc', 'desc'])) $sort_dir = 'desc';
+        
+        // Pass sorting info to view
+        $data['sort_field'] = $sort_field;
+        $data['sort_dir'] = $sort_dir;
+        
+        // Update your model call to include sorting
+        $data['products'] = $this->Produk_model->get_seller_products(
+            $this->session->userdata('user_id'),
+            $config['per_page'],
+            $page,
+            $sort_field,
+            $sort_dir
+        );
+        
+        $user_id = $this->session->userdata('user_id');
+
         $data = [
             'seller_data' => $this->User_model->get_seller_profile($user_id),
             'products' => $this->Produk_model->get_produk_by_seller($user_id),
             'kategori_options' => $this->Produk_model->get_kategori_options()
         ];
-        
+
         $this->load->view('folder_seller/produk/index', $data);
     }
 
@@ -82,7 +122,7 @@ class Seller extends CI_Controller
     public function store()
     {
         $this->set_product_validation_rules();
-        
+
         // Handle file upload
         $config['upload_path'] = './uploads/produk/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg';
@@ -162,10 +202,10 @@ class Seller extends CI_Controller
             if ($this->upload->do_upload('gambar')) {
                 $upload_data = $this->upload->data();
                 $update_data['gambar'] = $upload_data['file_name'];
-                
+
                 // Delete old image if not default
                 if ($product['gambar'] !== 'default.jpg') {
-                    @unlink('./uploads/produk/'.$product['gambar']);
+                    @unlink('./uploads/produk/' . $product['gambar']);
                 }
             }
         }
@@ -187,9 +227,9 @@ class Seller extends CI_Controller
         if ($product && $product['seller_id'] === $seller_id) {
             // Delete product image if not default
             if ($product['gambar'] !== 'default.jpg') {
-                @unlink('./uploads/produk/'.$product['gambar']);
+                @unlink('./uploads/produk/' . $product['gambar']);
             }
-            
+
             if ($this->Produk_model->delete_product($id, $seller_id)) {
                 $this->session->set_flashdata('success', 'Produk berhasil dihapus');
             } else {
@@ -206,12 +246,12 @@ class Seller extends CI_Controller
     public function orders()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $data = [
             'orders' => $this->Order_model->get_seller_orders($seller_id),
             'seller_data' => $this->User_model->get_seller_profile($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/orders/index', $data);
     }
 
@@ -219,17 +259,17 @@ class Seller extends CI_Controller
     {
         $seller_id = $this->session->userdata('user_id');
         $order = $this->Order_model->get_order_with_items($order_id, $seller_id);
-        
+
         if (!$order) {
             $this->session->set_flashdata('error', 'Order tidak ditemukan');
             redirect('seller/orders');
         }
-        
+
         $data = [
             'order' => $order,
             'seller_data' => $this->User_model->get_seller_profile($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/orders/detail', $data);
     }
 
@@ -238,18 +278,18 @@ class Seller extends CI_Controller
         $seller_id = $this->session->userdata('user_id');
         $order_id = $this->input->post('order_id');
         $status = $this->input->post('status');
-        
+
         // Validasi kepemilikan order
         if (!$this->Order_model->is_order_belongs_to_seller($order_id, $seller_id)) {
             return $this->json_response(false, 'Order tidak valid');
         }
-        
+
         if ($this->Order_model->update_order_status($order_id, $status)) {
             // Kirim notifikasi ke pembeli
             $this->send_order_notification($order_id, $status);
             return $this->json_response(true, 'Status order berhasil diperbarui');
         }
-        
+
         return $this->json_response(false, 'Gagal memperbarui status order');
     }
 
@@ -257,12 +297,12 @@ class Seller extends CI_Controller
     public function product_reviews()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $data = [
             'reviews' => $this->Produk_model->get_seller_product_reviews($seller_id),
             'seller_data' => $this->User_model->get_seller_profile($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/reviews/index', $data);
     }
 
@@ -271,16 +311,16 @@ class Seller extends CI_Controller
         $seller_id = $this->session->userdata('user_id');
         $review_id = $this->input->post('review_id');
         $reply = $this->input->post('reply');
-        
+
         // Validasi kepemilikan review
         if (!$this->Produk_model->is_review_belongs_to_seller($review_id, $seller_id)) {
             return $this->json_response(false, 'Review tidak valid');
         }
-        
+
         if ($this->Produk_model->add_review_reply($review_id, $reply, $seller_id)) {
             return $this->json_response(true, 'Balasan berhasil ditambahkan');
         }
-        
+
         return $this->json_response(false, 'Gagal menambahkan balasan');
     }
 
@@ -289,9 +329,9 @@ class Seller extends CI_Controller
     {
         $seller_id = $this->session->userdata('user_id');
         $date_range = $this->input->get('date_range') ?? 'this_month';
-        
+
         $report_data = $this->Order_model->get_sales_report($seller_id, $date_range);
-        
+
         $data = [
             'report' => $report_data,
             'seller_data' => $this->User_model->get_seller_profile($seller_id),
@@ -306,7 +346,7 @@ class Seller extends CI_Controller
                 'custom' => 'Custom'
             ]
         ];
-        
+
         $this->load->view('folder_seller/reports/sales', $data);
     }
 
@@ -314,22 +354,22 @@ class Seller extends CI_Controller
     {
         $seller_id = $this->session->userdata('user_id');
         $date_range = $this->input->get('date_range') ?? 'this_month';
-        
+
         $this->load->library('excel');
-        
+
         $report_data = $this->Order_model->get_sales_report($seller_id, $date_range);
-        
+
         // Replace PHPExcel with PhpSpreadsheet
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         // Set document properties
         $spreadsheet->getProperties()
             ->setCreator("Better-nak")
             ->setTitle("Sales Report")
             ->setSubject("Sales Report")
             ->setDescription("Sales report generated by Better-nak");
-        
+
         // Add headers
         $sheet->setCellValue('A1', 'Tanggal');
         $sheet->setCellValue('B1', 'Order ID');
@@ -337,32 +377,32 @@ class Seller extends CI_Controller
         $sheet->setCellValue('D1', 'Jumlah');
         $sheet->setCellValue('E1', 'Harga');
         $sheet->setCellValue('F1', 'Total');
-        
+
         // Add data
         $row = 2;
         foreach ($report_data as $item) {
-            $sheet->setCellValue('A'.$row, $item->order_date);
-            $sheet->setCellValue('B'.$row, $item->order_number);
-            $sheet->setCellValue('C'.$row, $item->product_name);
-            $sheet->setCellValue('D'.$row, $item->quantity);
-            $sheet->setCellValue('E'.$row, $item->price);
-            $sheet->setCellValue('F'.$row, $item->subtotal);
+            $sheet->setCellValue('A' . $row, $item->order_date);
+            $sheet->setCellValue('B' . $row, $item->order_number);
+            $sheet->setCellValue('C' . $row, $item->product_name);
+            $sheet->setCellValue('D' . $row, $item->quantity);
+            $sheet->setCellValue('E' . $row, $item->price);
+            $sheet->setCellValue('F' . $row, $item->subtotal);
             $row++;
         }
-        
+
         // Auto size columns
-        foreach(range('A','F') as $columnID) {
+        foreach (range('A', 'F') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
-        
+
         // Set headers for download
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="sales_report_'.date('Ymd').'.xlsx"');
+        header('Content-Disposition: attachment;filename="sales_report_' . date('Ymd') . '.xlsx"');
         header('Cache-Control: max-age=0');
-        
+
         // Update writer for Excel 2007+ format
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -371,18 +411,18 @@ class Seller extends CI_Controller
     public function profile()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $data = [
             'seller_data' => $this->User_model->get_seller_profile($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/profile/index', $data);
     }
 
     public function update_profile()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $this->form_validation->set_rules('name', 'Nama', 'required|max_length[100]');
         $this->form_validation->set_rules('phone', 'Nomor HP', 'required|numeric');
         $this->form_validation->set_rules('address', 'Alamat', 'required');
@@ -411,11 +451,11 @@ class Seller extends CI_Controller
             if ($this->upload->do_upload('profile_picture')) {
                 $upload_data = $this->upload->data();
                 $update_data['profile_picture'] = $upload_data['file_name'];
-                
+
                 // Delete old picture if exists
                 $old_picture = $this->User_model->get_user($seller_id)->profile_picture;
-                if ($old_picture && file_exists('./uploads/profile_pictures/'.$old_picture)) {
-                    @unlink('./uploads/profile_pictures/'.$old_picture);
+                if ($old_picture && file_exists('./uploads/profile_pictures/' . $old_picture)) {
+                    @unlink('./uploads/profile_pictures/' . $old_picture);
                 }
             }
         }
@@ -426,7 +466,7 @@ class Seller extends CI_Controller
                 'name' => $update_data['name'],
                 'business_name' => $update_data['business_name']
             ]);
-            
+
             $this->session->set_flashdata('success', 'Profil berhasil diperbarui');
         } else {
             $this->session->set_flashdata('error', 'Gagal memperbarui profil');
@@ -474,9 +514,9 @@ class Seller extends CI_Controller
             'shipped' => 'telah dikirim',
             'completed' => 'telah selesai'
         ];
-        
+
         $message = "Order #{$order->order_number} {$status_labels[$status]}";
-        
+
         $this->Notification_model->create_notification([
             'user_id' => $order->user_id,
             'message' => $message,
@@ -499,96 +539,147 @@ class Seller extends CI_Controller
     public function notifications()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $data = [
             'notifications' => $this->Notification_model->get_user_notifications($seller_id),
+            'unread_count' => $this->Notification_model->count_unread_notifications($seller_id),
             'seller_data' => $this->User_model->get_seller_profile($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/notifications/index', $data);
     }
-    
+
+  /**
+     * AJAX method for product creation
+     * 
+     * @return JSON response
+     */
+    public function create_product_ajax()
+    {
+        // Check if request is AJAX
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $seller_id = $this->session->userdata('user_id');
+        
+        $this->set_product_validation_rules();
+
+        if (!$this->form_validation->run()) {
+            return $this->json_response(false, validation_errors());
+        }
+
+        // Handle file upload
+        $config['upload_path'] = './uploads/produk/';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg';
+        $config['max_size'] = 2048;
+        $this->upload->initialize($config);
+
+        // Process image upload
+        $gambar = 'default.jpg';
+        if ($this->upload->do_upload('gambar')) {
+            $upload_data = $this->upload->data();
+            $gambar = $upload_data['file_name'];
+        } else if (!empty($_FILES['gambar']['name'])) {
+            // If upload fails but file was provided
+            return $this->json_response(false, $this->upload->display_errors('', ''));
+        }
+
+        $product_data = $this->get_product_input_data();
+        $product_data['gambar'] = $gambar;
+
+        if ($this->Produk_model->save_product($product_data)) {
+            return $this->json_response(true, 'Produk berhasil ditambahkan');
+        } else {
+            // If image was uploaded but DB insert failed, delete the image
+            if ($gambar !== 'default.jpg') {
+                @unlink('./uploads/produk/' . $gambar);
+            }
+            return $this->json_response(false, 'Gagal menyimpan data ke database');
+        }
+    }
+
     public function mark_notification_read($notification_id)
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         if ($this->Notification_model->mark_as_read($notification_id, $seller_id)) {
             return $this->json_response(true, 'Notifikasi ditandai sebagai dibaca');
         }
-        
+
         return $this->json_response(false, 'Gagal menandai notifikasi');
     }
-    
+
     public function mark_all_notifications_read()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         if ($this->Notification_model->mark_all_as_read($seller_id)) {
             return $this->json_response(true, 'Semua notifikasi ditandai sebagai dibaca');
         }
-        
+
         return $this->json_response(false, 'Gagal menandai notifikasi');
     }
-    
+
     // Settings Methods
     public function settings()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $data = [
             'seller_data' => $this->User_model->get_seller_profile($seller_id),
             'settings' => $this->Seller_model->get_seller_settings($seller_id)
         ];
-        
+
         $this->load->view('folder_seller/settings/index', $data);
     }
-    
+
     public function update_settings()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $this->form_validation->set_rules('notification_email', 'Email Notifikasi', 'required|in_list[0,1]');
         $this->form_validation->set_rules('notification_app', 'Notifikasi Aplikasi', 'required|in_list[0,1]');
-        
+
         if ($this->form_validation->run() === FALSE) {
             return $this->settings();
         }
-        
+
         $settings_data = [
             'notification_email' => $this->input->post('notification_email'),
             'notification_app' => $this->input->post('notification_app')
         ];
-        
+
         if ($this->Seller_model->update_settings($seller_id, $settings_data)) {
             $this->session->set_flashdata('success', 'Pengaturan berhasil diperbarui');
         } else {
             $this->session->set_flashdata('error', 'Gagal memperbarui pengaturan');
         }
-        
+
         redirect('seller/settings');
     }
-    
+
     // Password Change Method
     public function change_password()
     {
         $seller_id = $this->session->userdata('user_id');
-        
+
         $this->form_validation->set_rules('current_password', 'Password Saat Ini', 'required');
         $this->form_validation->set_rules('new_password', 'Password Baru', 'required|min_length[8]');
         $this->form_validation->set_rules('confirm_password', 'Konfirmasi Password', 'required|matches[new_password]');
-        
+
         if ($this->form_validation->run() === FALSE) {
             $data = [
                 'seller_data' => $this->User_model->get_seller_profile($seller_id)
             ];
-            
+
             $this->load->view('folder_seller/profile/change_password', $data);
             return;
         }
-        
+
         $current_password = $this->input->post('current_password');
         $new_password = $this->input->post('new_password');
-        
+
         if ($this->User_model->change_password($seller_id, $current_password, $new_password)) {
             $this->session->set_flashdata('success', 'Password berhasil diubah');
             redirect('seller/profile');
@@ -603,7 +694,7 @@ class Seller extends CI_Controller
     {
         $jenis_produk = $this->input->post('jenis_produk');
         $kategori = $this->Produk_model->get_kategori_by_jenis($jenis_produk);
-    
+
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($kategori));
