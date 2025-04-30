@@ -125,7 +125,6 @@
             text-align: center;
         }
     </style>
-    // In head section
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
@@ -148,7 +147,7 @@
                             <div class="position-relative">
                                 <i class="fas fa-envelope form-icon"></i>
                                 <input type="email" name="email" class="form-control" id="email" 
-                                       placeholder="Alamat Email" value="<?= set_value('email') ?>" required>
+                                       placeholder="Masukkan Email" value="<?= set_value('email') ?>" required>
                             </div>
                             <?= form_error('email', '<small class="text-danger">', '</small>') ?>
                         </div>
@@ -197,10 +196,7 @@
             }
         }
     </script>
-    // Before closing body
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    // Add this script after form
     <script>
         <?php if(validation_errors() || isset($error)): ?>
             Swal.fire({

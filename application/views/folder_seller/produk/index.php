@@ -9,6 +9,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Better-nak</title>
+
+    <link rel="icon" href="<?= site_url('fruitables/img/favicon.ico') ?>" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -109,17 +111,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?= site_url('seller/analytics') ?>">
-                                <i class="fas fa-chart-line me-2"></i> Analytics
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= site_url('seller/reviews') ?>">
+                            <a class="nav-link" href="<?= site_url('seller/product_reviews') ?>">
                                 <i class="fas fa-comments me-2"></i> Reviews
                             </a>
                         </li>
                         <li class="nav-item mt-3">
-                            <a class="nav-link text-danger" href="<?= site_url('auth') ?>">
+                            <a class="nav-link text-danger" href="<?= site_url('auth/logout') ?>">
                                 <i class="fas fa-sign-out-alt me-2"></i> Logout
                             </a>
                         </li>
@@ -162,16 +159,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                         <input type="text" id="productSearch" class="form-control" placeholder="Cari produk...">
                                     </div>
                                 </div>
-                                <div class="col-md-6 text-end">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortProducts('nama')">
-                                            Sortir Nama <i class="fas fa-sort"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortProducts('harga')">
-                                            Sortir Harga <i class="fas fa-sort-amount-down"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                             
                             </div>
                         </div>
 
@@ -198,34 +186,35 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                         <?php foreach ($products as $product): ?>
                                             <tr>
                                                 <td>
-                                                    <img src="<?= base_url('uploads/produk/' . ($product['gambar'] ?? 'default.jpg')) ?>"
+                                                    <img src="<?= base_url('uploads/products/' . ($product['image'] ?? 'default.jpg')) ?>"
                                                         class="product-image img-thumbnail"
-                                                        alt="<?= htmlspecialchars($product['nama_produk'] ?? '') ?>">
+                                                        alt="<?= htmlspecialchars($product['name'] ?? '') ?>">
                                                 </td>
-                                                <td><?= htmlspecialchars($product['nama_produk'] ?? '') ?></td>
-                                                <td><?= htmlspecialchars($product['deskripsi'] ?? '') ?></td>
-                                                <td>Rp <?= number_format($product['harga'], 0, ',', '.') ?></td>
-                                                <td><?= $product['stok'] ?></td>
+                                                <td><?= htmlspecialchars($product['name'] ?? '') ?></td>
+                                                <td><?= htmlspecialchars($product['description'] ?? '') ?></td>
+                                                <td>Rp <?= number_format($product['price'], 0, ',', '.') ?></td>
+                                                <td><?= $product['stock'] ?></td>
                                                 <td>
                                                     <button type="button"
                                                         class="btn btn-sm btn-warning me-1 edit-product"
                                                         title="Edit"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#editModal"
-                                                        data-id="<?= $product['id_produk'] ?>"
-                                                        data-nama="<?= htmlspecialchars($product['nama_produk']) ?>"
-                                                        data-harga="<?= $product['harga'] ?>"
-                                                        data-stok="<?= $product['stok'] ?>"
-                                                        data-jenis="<?= $product['jenis_produk'] ?>"
-                                                        data-kategori="<?= $product['kategori_id'] ?>"
-                                                        data-umur="<?= $product['umur'] ?? '' ?>"
-                                                        data-berat="<?= $product['berat'] ?? '' ?>">
+                                                        data-id="<?= $product['id'] ?>"
+                                                        data-nama="<?= htmlspecialchars($product['name']) ?>"
+                                                        data-harga="<?= $product['price'] ?>"
+                                                        data-stok="<?= $product['stock'] ?>"
+                                                        data-jenis="<?= $product['type'] ?>"
+                                                        data-kategori="<?= $product['category_id'] ?>"
+                                                        data-umur="<?= $product['age'] ?? '' ?>"
+                                                        data-berat="<?= $product['weight'] ?? '' ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <button type="button"
                                                         class="btn btn-sm btn-danger delete-product"
-                                                        title="Hapus"
-                                                        data-id="<?= $product['id_produk'] ?>">
+                                                        title="Hapus" 
+                                                        onclick="confirmDelete(<?= $product['id'] ?>)"
+                                                        data-id="<?= $product['id'] ?>">    
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                     <!-- delete button -->
@@ -310,20 +299,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <!-- End Hewan Ternak Fields -->
                         </div>
 
-                        <!-- REMOVE THIS DUPLICATE ROW -->
-                        <!-- <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Umur (bulan)</label>
-                                <input type="number" class="form-control" name="umur" min="0">
-                                <div class="invalid-feedback">Harap isi umur yang valid (opsional)</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Berat (kg)</label>
-                                <input type="number" class="form-control" name="berat" step="0.1" min="0">
-                                <div class="invalid-feedback">Harap isi berat yang valid (opsional)</div>
-                            </div>
-                        </div> -->
-
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Harga (Rp) <span class="text-danger">*</span></label>
@@ -351,8 +326,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Simpan Produk
+                        <button type="submit" class="btn btn-primary" id="saveProductBtn" data-target-table="products">
+                            <i class="fas fa-save me-2"></i>Simpan
                         </button>
                     </div>
                 </form>
@@ -376,6 +351,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 document.getElementById('beratProduk').value = '';
             }
         }
+
+        // Delete product handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to delete buttons
+            const deleteButtons = document.querySelectorAll('.delete-product');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    confirmDelete(productId);
+                });
+            });
+        });
 
         // Confirm product deletion
         // Loading overlay handler
@@ -404,34 +391,17 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '<?= site_url('seller/delete/') ?>' + productId;
-                }
-            });
-        }
-
-        // Form validation and AJAX submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const productForm = document.getElementById('productForm');
-
-            if (productForm) {
-                productForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const formData = new FormData(productForm);
-                    const submitBtn = productForm.querySelector('button[type="submit"]');
-                    const originalBtnText = submitBtn.innerHTML;
-
-                    // Show loading state
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
-
-                    // AJAX submission code already exists from line 423-481
-                    fetch(productForm.action, {
+                    loadingOverlay.show();
+                    // Use fetch API for AJAX request
+                    fetch('<?= site_url('seller/products/delete/') ?>' + productId, {
                             method: 'POST',
-                            body: formData // Contains all form data including file
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
                         })
                         .then(response => response.json())
                         .then(data => {
+                            loadingOverlay.hide();
                             if (data.success) {
                                 Swal.fire({
                                     icon: 'success',
@@ -440,42 +410,42 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                     showConfirmButton: false,
                                     timer: 1500
                                 }).then(() => {
-                                    // Close modal and refresh page
-                                    const modal = bootstrap.Modal.getInstance(document.getElementById('tambahProdukModal'));
-                                    modal.hide();
                                     window.location.reload();
                                 });
                             } else {
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Gagal',
-                                    text: data.message || 'Terjadi kesalahan'
+                                    text: data.message || 'Terjadi kesalahan saat menghapus produk'
                                 });
                             }
                         })
                         .catch(error => {
+                            loadingOverlay.hide();
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
                                 text: 'Terjadi kesalahan pada server'
                             });
-                        })
-                        .finally(() => {
-                            // Reset button state
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalBtnText;
+                            console.error('Error:', error);
                         });
-                });
-            }
+                }
+            });
+        }
 
-            // Reset form when modal is closed
-            const productModal = document.getElementById('tambahProdukModal');
-            if (productModal) {
-                productModal.addEventListener('hidden.bs.modal', function() {
-                    productForm.reset();
-                });
+        // Function to sort products
+        function sortProducts(sortBy) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSort = urlParams.get('sort');
+            const currentDir = urlParams.get('dir') || 'asc';
+            
+            let newDir = 'asc';
+            if (currentSort === sortBy) {
+                newDir = currentDir === 'asc' ? 'desc' : 'asc';
             }
-        });
+            
+            window.location.href = `<?= site_url('seller/produk?sort=') ?>${sortBy}&dir=${newDir}`;
+        }
     </script>
 
     <!-- Add Edit Modal after Add Product Modal -->
@@ -493,15 +463,15 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Produk</label>
-                                <input type="text" class="form-control" name="nama_produk" id="edit_nama" required>
+                                <input type="text" class="form-control" name="nama_produk" id="edit_nama" required placeholder="Masukkan nama produk">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Harga (Rp)</label>
-                                <input type="number" class="form-control" name="harga" id="edit_harga" required>
+                                <input type="number" class="form-control" name="harga" id="edit_harga" required placeholder="Contoh: 150000">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Stok</label>
-                                <input type="number" class="form-control" name="stok" id="edit_stok" required>
+                                <input type="number" class="form-control" name="stok" id="edit_stok" required placeholder="Jumlah stok tersedia">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Jenis Produk</label>
@@ -514,7 +484,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 <label class="form-label">Kategori</label>
                                 <select class="form-select" name="kategori_id" id="edit_kategori" required>
                                     <?php foreach ($kategori_options as $kategori): ?>
-                                        <option value="<?= $kategori['id_kategori'] ?>"><?= $kategori['nama_kategori'] ?></option>
+                                        <option value="<?= $kategori['id'] ?>"><?= $kategori['name'] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -522,11 +492,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <div id="edit_hewanFields" style="display: none;">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Umur (bulan)</label>
-                                    <input type="number" class="form-control" name="umur" id="edit_umur">
+                                    <input type="number" class="form-control" name="umur" id="edit_umur" placeholder="Contoh: 24">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Berat (kg)</label>
-                                    <input type="number" class="form-control" name="berat" id="edit_berat" step="0.1">
+                                    <input type="number" class="form-control" name="berat" id="edit_berat" step="0.1" placeholder="Contoh: 250.5">
                                 </div>
                             </div>
                         </div>

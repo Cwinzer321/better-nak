@@ -13,10 +13,11 @@ class Beranda extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->helper('date');
         $this->load->model(['Notification_model', 'User_model', 'Cart_model', 'Produk_model', 'Testimonial_model']);
     }
-    public function index()
-    {
+    public function index() {
+        $this->load->helper('date');
         $data = [];
 
         if ($this->session->userdata('logged_in')) {

@@ -24,8 +24,8 @@
                 <div class="d-flex flex-column text-start footer-item">
                     <h4 class="text-light mb-3">Navigasi</h4>
                     <a class="btn-link" href="<?= site_url() ?>">Beranda</a>
-                    <a class="btn-link" href="<?= site_url('shop') ?>">Produk Ternak</a>
-                    <a class="btn-link" href="<?= site_url('contact') ?>">Contact Us</a>
+                    <a class="btn-link" href="<?= site_url('shop') ?>">Belanja</a>
+                    <a class="btn-link" href="<?= site_url('contact') ?>">Kontak</a>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6 mb-4">
@@ -41,13 +41,14 @@
             </div>
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="footer-item h-100">
-                    <h4 class="text-light mb-3">Kontak</h4>
+                    <h4 class="text-light mb-3">Kontak Kami</h4>
                     <p>Jl. Peternakan No. 123, Bandung, Jawa Barat</p>
-                    <p>Email: info@betternak.com</p>
+                    <p>Email: Better-nak@gmail.com</p>
                     <p>Telepon: +62 123 4567 8910</p>
                     <p>WhatsApp: +62 987 6543 210</p>
                     <p class="mb-3">Buka Setiap Hari: 08.00 - 17.00 WIB</p>
-                    <img src="<?= site_url('fruitables/img/payment.png') ?>" class="img-fluid mt-3" alt="Metode Pembayaran" style="max-width: 280px;">
+
+                    <div class="position-relative w-100">
                 </div>
             </div>
         </div>

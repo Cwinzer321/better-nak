@@ -7,11 +7,11 @@ $this->load->view('templates/header');
 
 <!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
-    <h1 class="text-center text-white display-6">Cart</h1>
+    <h1 class="text-center text-white display-6">Keranjang</h1>
     <ol class="breadcrumb justify-content-center mb-0">
-        <li class="breadcrumb-item"><a href="<?= site_url('beranda') ?>">Home</a></li>
-        <li class="breadcrumb-item"><a href="<?= site_url('shop') ?>">Shop</a></li>
-        <li class="breadcrumb-item active text-white">Cart</li>
+        <li class="breadcrumb-item"><a href="<?= site_url('beranda') ?>">Beranda</a></li>
+        <li class="breadcrumb-item"><a href="<?= site_url('shop') ?>">Belanja</a></li>
+        <li class="breadcrumb-item active text-white">Keranjang</li>
     </ol>
 </div>
 <!-- Single Page Header End -->
@@ -37,8 +37,31 @@ $this->load->view('templates/header');
             </table>
         </div>
         <div class="mt-5">
+            <!-- Cart Status Indicator -->
+            <div class="d-inline-block me-4">
+                <?php
+                $user_id = $this->session->userdata('user_id') ?? null;
+                $cart_count = 0;
+                
+                if ($user_id) {
+                    $this->db->select_sum('quantity');
+                    $this->db->where('user_id', $user_id);
+                    $cart_data = $this->db->get('carts')->row();
+                    $cart_count = $cart_data->quantity ?? 0;
+                }
+                ?>
+                <a href="<?= site_url('cart') ?>" class="btn border-0 bg-transparent position-relative">
+                    <i class="fas fa-shopping-cart text-primary fa-lg"></i>
+                    <?php if ($cart_count > 0): ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <?= $cart_count ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
+                <span class="ms-2">Total Item: <?= $cart_count ?></span>
+            </div>
+            
             <a href="<?= site_url('checkout') ?>" class="btn btn-success rounded-pill px-4 py-3 ms-2">Checkout</a>
-            <button class="btn btn-primary rounded-pill px-4 py-3 ms-2" type="button" onclick="saveCart()">Simpan ke Cart</button>
             <script>
                 function saveCart() {
                     $.ajax({
@@ -65,7 +88,7 @@ $this->load->view('templates/header');
                             <?php
                             $subtotal = 0;
                             foreach ($cart_items as $item) {
-                                $subtotal += $item['harga'] * $item['quantity'];
+                                $subtotal += ($item['harga'] ?? 0) * ($item['quantity'] ?? 0);
                             }
                             ?>
                             <p class="mb-0"><?= 'Rp ' . number_format($subtotal, 0, ',', '.') ?></p>
@@ -135,11 +158,11 @@ $this->load->view('templates/footer');
 <tbody>
     <?php foreach ($cart_items as $item): ?>
         <tr>
-            <td><img src="<?= site_url('uploads/' . $item['gambar']) ?>" style="width: 50px;" alt="<?= $item['nama_produk'] ?>"></td>
-            <td><?= $item['nama_produk'] ?></td>
-            <td>Rp<?= number_format($item['harga'], 0, ',', '.') ?></td>
-            <td><?= $item['quantity'] ?></td>
-            <td>Rp<?= number_format($item['harga'] * $item['quantity'], 0, ',', '.') ?></td>
+            <td><img src="<?= site_url('uploads/' . ($item['gambar'] ?? 'default.jpg')) ?>" style="width: 50px;" alt="<?= $item['nama_produk'] ?? '' ?>"></td>
+            <td><?= htmlspecialchars($item['nama_produk'] ?? 'Produk Tidak Dikenal', ENT_QUOTES, 'UTF-8') ?></td>
+            <td>Rp<?= number_format($item['harga'] ?? 0, 0, ',', '.') ?></td>
+            <td><?= $item['quantity'] ?? 0 ?></td>
+            <td>Rp<?= number_format(($item['harga'] ?? 0) * ($item['quantity'] ?? 0), 0, ',', '.') ?></td>
             <td>
                 <a href="<?= site_url('cart/remove/' . $item['id']) ?>" class="btn btn-danger btn-sm">
                     <i class="fa fa-trash"></i>

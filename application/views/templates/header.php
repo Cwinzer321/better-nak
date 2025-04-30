@@ -138,15 +138,15 @@ if ($this->session->userdata('logged_in')) {
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-center">
-                        <a href="<?= site_url('beranda'); ?>" class="nav-item nav-link <?= strpos(current_url(), 'beranda') !== false ? 'active' : '' ?>">Home</a>
-                        <a href="<?= site_url('shop'); ?>" class="nav-item nav-link <?= uri_string() === 'shop' ? 'active' : '' ?>">Shop</a>
-                        <a href="<?= site_url('contact') ?>" class="nav-item nav-link <?= uri_string() === 'contact' ? 'active' : '' ?>">Contact</a>
-                        <a href="<?= site_url('aboutus') ?>" class="nav-item nav-link <?= uri_string() === 'aboutus' ? 'active' : '' ?>">About Us</a>
+                    <div class="navbar-nav mb-2 mb-lg-0 ms-auto">  <!-- Changed mx-auto to ms-auto -->
+                        <a href="<?= site_url('beranda'); ?>" class="nav-item nav-link <?= strpos(current_url(), 'beranda') !== false ? 'active' : '' ?>">Beranda</a>
+                        <a href="<?= site_url('shop'); ?>" class="nav-item nav-link <?= uri_string() === 'shop' ? 'active' : '' ?>">Belanja</a>
+                        <a href="<?= site_url('contact') ?>" class="nav-item nav-link <?= uri_string() === 'contact' ? 'active' : '' ?>">Kontak</a>
+                        <a href="<?= site_url('aboutus') ?>" class="nav-item nav-link <?= uri_string() === 'aboutus' ? 'active' : '' ?>">Tentang Kami</a>
                     </div>
 
                     <?php if ($this->session->userdata('logged_in')): ?>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center ms-lg-3">  <!-- Added mobile spacing -->
                             <!-- Cart -->
                             <a href="<?= site_url('cart'); ?>" class="btn border-0 bg-transparent me-4 position-relative">
                                 <i class="fas fa-shopping-cart text-primary fa-lg"></i>
@@ -172,11 +172,11 @@ if ($this->session->userdata('logged_in')) {
                                     </li>
                                     <?php foreach ($notifications as $notif): ?>
                                         <li>
-                                            <a class="dropdown-item <?= $notif['is_read'] ? '' : 'fw-bold unread' ?>" href="<?= $notif['link'] ?>">
-                                                <i class="fas fa-<?= $notif['type'] === 'order' ? 'shopping-cart' : 'info-circle' ?> me-2 text-primary"></i>
+                                            <a class="dropdown-item <?= $notif['is_read'] ? '' : 'fw-bold unread' ?>" href="<?= $notif['link'] ?? '#' ?>">
+                                                <i class="fas fa-<?= ($notif['type'] ?? 'info') === 'order' ? 'shopping-cart' : 'info-circle' ?> me-2 text-primary"></i>
                                                 <div class="d-flex flex-column">
                                                     <?= htmlspecialchars($notif['message'], ENT_QUOTES, 'UTF-8') ?>
-                                                    <small class="text-muted mt-1"><?= timespan($notif['created_at'], time()) ?> lalu</small>
+                                                    <small class="text-muted mt-1"><?= date('d M Y H:i', strtotime($notif['created_at'])) ?></small>
                                                 </div>
                                             </a>
                                         </li>
@@ -199,15 +199,14 @@ if ($this->session->userdata('logged_in')) {
                                     <img src="<?= $profile_picture ?>" class="rounded-circle me-2"
                                         width="40" height="40" alt="Profile"
                                         style="object-fit: cover; border: 2px solid #f8f9fa;">
-                                    <span class="text-dark fw-medium"><?= htmlspecialchars($this->session->userdata('name') ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span class="text-dark fw-medium d-none d-lg-inline"><?= htmlspecialchars($this->session->userdata('name') ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow"
                                     aria-labelledby="profileDropdown"
                                     style="min-width: 220px; padding: 0.5rem 0;">
-                                    <li><a class="dropdown-item py-2 px-3 d-flex align-items-center" href="<?= site_url('profile') ?>">
-                                            <i class="fas fa-user me-2 text-primary fs-6"></i>Profil
+                                            <i class="fas fa-user me-2 text-primary fs-6"></i>Profile
                                         </a></li>
-                                    <?php if ($this->session->userdata('role') == 'penjual'): ?>
+                                    <?php if (($this->session->userdata('role') ?? '') === 'seller'): ?>
                                         <li>
                                             <hr class="dropdown-divider my-2">
                                         </li>
@@ -238,25 +237,44 @@ if ($this->session->userdata('logged_in')) {
     <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize Bootstrap dropdowns
         document.addEventListener('DOMContentLoaded', function() {
-            // Inisialisasi dropdown manual
-            var dropdownElements = document.querySelectorAll('.dropdown-toggle');
-            dropdownElements.forEach(function(dropdownEl) {
-                new bootstrap.Dropdown(dropdownEl);
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+
+            dropdownToggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const parentDropdown = this.parentElement;
+                    const dropdownMenu = parentDropdown.querySelector('.dropdown-menu');
+
+                    if (parentDropdown.classList.contains('show')) {
+                        parentDropdown.classList.remove('show');
+                        dropdownMenu.classList.remove('show');
+                    } else {
+                        // Close other open dropdowns
+                        document.querySelectorAll('.dropdown.show .dropdown-menu.show').forEach(function(openMenu) {
+                            openMenu.classList.remove('show');
+                            openMenu.parentElement.classList.remove('show');
+                        });
+
+                        parentDropdown.classList.add('show');
+                        dropdownMenu.classList.add('show');
+                    }
+                });
             });
 
-            // Menangani klik di luar dropdown untuk menutupnya
-            document.addEventListener('click', function(event) {
-                var dropdowns = document.querySelectorAll('.dropdown');
-                dropdowns.forEach(function(dropdown) {
-                    var dropdownMenu = dropdown.querySelector('.dropdown-menu');
-                    if (!dropdown.contains(event.target) && dropdownMenu.classList.contains('show')) {
-                        var dropdownToggle = dropdown.querySelector('.dropdown-toggle');
-                        var dropdownInstance = bootstrap.Dropdown.getInstance(dropdownToggle);
-                        dropdownInstance.hide();
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                dropdownToggles.forEach(function(toggle) {
+                    const parentDropdown = toggle.parentElement;
+                    if (!parentDropdown.contains(e.target)) {
+                        parentDropdown.classList.remove('show');
+                        const dropdownMenu = parentDropdown.querySelector('.dropdown-menu');
+                        if (dropdownMenu) {
+                            dropdownMenu.classList.remove('show');
+                        }
                     }
                 });
             });
@@ -266,10 +284,10 @@ if ($this->session->userdata('logged_in')) {
             Swal.fire({
                 title: 'Konfirmasi Logout',
                 text: "Apakah Anda yakin ingin keluar?",
-                icon: 'question',
+                icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#6c757d',
+                cancelButtonColor: '#d33',
                 confirmButtonText: 'Ya, Logout',
                 cancelButtonText: 'Batal'
             }).then((result) => {
@@ -278,20 +296,6 @@ if ($this->session->userdata('logged_in')) {
                 }
             });
         }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            var dropdowns = document.querySelectorAll('.dropdown');
-            dropdowns.forEach(function(dropdown) {
-                if (!dropdown.contains(event.target)) {
-                    var dropdownMenu = dropdown.querySelector('.dropdown-menu');
-                    if (dropdownMenu.classList.contains('show')) {
-                        var dropdownToggle = dropdown.querySelector('.dropdown-toggle');
-                        bootstrap.Dropdown.getInstance(dropdownToggle).hide();
-                    }
-                }
-            });
-        });
     </script>
 </body>
 
