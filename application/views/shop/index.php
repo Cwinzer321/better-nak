@@ -2,7 +2,7 @@
 // Load header template
 $this->load->view('templates/header');
 ?>
-
+<!-- testing -->
 <!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
     <h1 class="text-center text-white display-6">Belanja</h1>
@@ -29,8 +29,8 @@ $this->load->view('templates/header');
                                 Semua Kategori
                             </a>
                             <?php foreach ($categories as $category): ?>
-                                <a href="<?= site_url('shop?category_id=' . $category['id']) ?>" 
-                                   class="list-group-item list-group-item-action <?= (isset($_GET['category_id']) && $_GET['category_id'] == $category['id']) ? 'active' : '' ?>">
+                                <a href="<?= site_url('shop?category_id=' . $category['id']) ?>"
+                                    class="list-group-item list-group-item-action <?= (isset($_GET['category_id']) && $_GET['category_id'] == $category['id']) ? 'active' : '' ?>">
                                     <?= htmlspecialchars($category['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                             <?php endforeach; ?>
